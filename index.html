@@ -121,16 +121,44 @@
 
   footer{padding:32px 0; text-align:center; color:var(--muted); font-size:12.5px; font-family:'JetBrains Mono',monospace;}
 
+  .welcome-toast{
+    position:fixed; left:50%; bottom:26px; transform:translateX(-50%) translateY(20px);
+    background:var(--ink); color:var(--paper); border-radius:6px;
+    padding:12px 16px; display:flex; align-items:center; gap:12px;
+    font-family:'JetBrains Mono',monospace; font-size:13px;
+    box-shadow:0 14px 32px -12px rgba(0,0,0,0.35);
+    opacity:0; pointer-events:none; transition:opacity .4s ease, transform .4s ease;
+    z-index:50; max-width:90vw;
+  }
+  .welcome-toast.show{opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto;}
+  .welcome-toast .wt-dot{width:7px; height:7px; border-radius:50%; background:var(--accent); flex-shrink:0;}
+  .welcome-toast span.wt-text{white-space:nowrap; overflow:hidden;}
+  .welcome-toast button{
+    background:none; border:none; color:#8A93A3; cursor:pointer; font-size:15px;
+    line-height:1; padding:0 0 0 4px; flex-shrink:0;
+  }
+  .welcome-toast button:hover{color:var(--paper);}
+  [data-theme="dark"] .welcome-toast{background:#F2F1ED; color:#15191F;}
+  [data-theme="dark"] .welcome-toast button{color:#5B6478;}
+  [data-theme="dark"] .welcome-toast button:hover{color:#15191F;}
+
   @media (max-width:600px){
     .hero{flex-direction:column; text-align:center;}
     nav{justify-content:center; flex-wrap:wrap;}
     .contact-item{justify-content:center;}
     .top-row{flex-direction:column; gap:10px;}
     .theme-toggle{margin-top:0;}
+    .welcome-toast{font-size:12px; padding:10px 14px;}
   }
 </style>
 </head>
 <body>
+
+<div class="welcome-toast" id="welcomeToast">
+  <span class="wt-dot"></span>
+  <span class="wt-text" id="welcomeText"></span>
+  <button id="welcomeClose" aria-label="Dismiss">×</button>
+</div>
 
 <header class="wrap">
   <div class="top-row">
@@ -280,7 +308,39 @@
         }
       });
     }
+    // Welcome toast
+    var toast = document.getElementById('welcomeToast');
+    var toastText = document.getElementById('welcomeText');
+    var toastClose = document.getElementById('welcomeClose');
+    var welcomeMsg = "welcome — thanks for stopping by my site";
+    if (toast && toastText){
+      var dismissTimer;
+      function dismissToast(){
+        toast.classList.remove('show');
+        clearTimeout(dismissTimer);
+      }
+      setTimeout(function(){
+        toast.classList.add('show');
+        if (reduceMotion){
+          toastText.textContent = welcomeMsg;
+        } else {
+          var j = 0;
+          (function typeToast(){
+            if (j <= welcomeMsg.length){
+              toastText.textContent = welcomeMsg.slice(0, j);
+              j++;
+              setTimeout(typeToast, 28);
+            }
+          })();
+        }
+        dismissTimer = setTimeout(dismissToast, 6000);
+      }, 600);
+      if (toastClose){
+        toastClose.addEventListener('click', dismissToast);
+      }
+    }
   })();
 </script>
 </body>
 </html>
+
